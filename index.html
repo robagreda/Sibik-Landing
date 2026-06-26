@@ -528,12 +528,36 @@
       btn.textContent = 'Enviando...';
       btn.classList.add('loading');
 
-      // Replace this URL with your actual form endpoint (Formspree, Supabase, etc.)
-      // For now we simulate a successful submission
-      await new Promise(r => setTimeout(r, 1200));
+      try {
+        const res = await fetch('https://hwixpdgluyzrwobcnznp.supabase.co/rest/v1/waitlist', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3aXhwZGdsdXl6cndvYmNuem5wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDg4NzksImV4cCI6MjA5Nzk4NDg3OX0.6_5h1se4V3woXFy41AQpwUHJVyGi3x6onxqgAjL7xbE',
+            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3aXhwZGdsdXl6cndvYmNuem5wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MDg4NzksImV4cCI6MjA5Nzk4NDg3OX0.6_5h1se4V3woXFy41AQpwUHJVyGi3x6onxqgAjL7xbE',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({ email, department: dept })
+        });
 
-      form.style.display = 'none';
-      successMsg.classList.add('visible');
+        if (res.status === 409) {
+          form.style.display = 'none';
+          successMsg.classList.add('visible');
+          successMsg.querySelector('p:first-child').textContent = '¡Ya estás registrado!';
+          successMsg.querySelector('p:last-child').textContent = 'Te avisamos cuando Sibik llegue a tu departamento.';
+          return;
+        }
+
+        if (!res.ok) throw new Error('Error al guardar');
+
+        form.style.display = 'none';
+        successMsg.classList.add('visible');
+
+      } catch (err) {
+        btn.textContent = 'Quiero acceso anticipado';
+        btn.classList.remove('loading');
+        alert('Hubo un error. Por favor intenta de nuevo.');
+      }
     });
   </script>
 

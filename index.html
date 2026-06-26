@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sibik — Lo que pasa cerca, en tiempo real</title>
+  <meta name="description" content="Reportes ciudadanos en tiempo real para El Salvador. Sé el primero en saberlo." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --teal: #128FA5;
+      --teal-dim: rgba(18, 143, 165, 0.12);
+      --teal-glow: rgba(18, 143, 165, 0.25);
+      --black: #000000;
+      --white: #ffffff;
+      --gray-1: #111111;
+      --gray-2: #1a1a1a;
+      --gray-3: #333333;
+      --gray-text: #888888;
+      --font: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font);
+      background: var(--black);
+      color: var(--white);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 40px;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .nav-logo {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--teal);
+      letter-spacing: -0.5px;
+    }
+
+    .nav-badge {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--teal);
+      background: var(--teal-dim);
+      border: 1px solid rgba(18,143,165,0.3);
+      padding: 6px 14px;
+      border-radius: 999px;
+    }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 120px 24px 80px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(18,143,165,0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-icon {
+      width: 72px;
+      height: 72px;
+      margin-bottom: 32px;
+    }
+
+    .hero-eyebrow {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 20px;
+    }
+
+    .hero-title {
+      font-size: clamp(40px, 7vw, 80px);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -2px;
+      max-width: 760px;
+      margin-bottom: 24px;
+    }
+
+    .hero-title span {
+      color: var(--teal);
+    }
+
+    .hero-sub {
+      font-size: clamp(16px, 2.5vw, 20px);
+      font-weight: 400;
+      color: var(--gray-text);
+      max-width: 480px;
+      line-height: 1.6;
+      margin-bottom: 48px;
+    }
+
+    /* FORM */
+    .waitlist-form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      max-width: 440px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .form-input {
+      flex: 1;
+      background: var(--gray-1);
+      border: 1px solid var(--gray-3);
+      border-radius: 12px;
+      padding: 16px 20px;
+      font-family: var(--font);
+      font-size: 15px;
+      color: var(--white);
+      outline: none;
+      transition: border-color 0.2s;
+      width: 100%;
+    }
+
+    .form-input::placeholder { color: #555; }
+
+    .form-input:focus {
+      border-color: var(--teal);
+    }
+
+    select.form-input {
+      appearance: none;
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+      padding-right: 44px;
+    }
+
+    select.form-input option { background: #111; }
+
+    .form-btn {
+      background: var(--teal);
+      color: var(--white);
+      border: none;
+      border-radius: 12px;
+      padding: 16px 24px;
+      font-family: var(--font);
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      width: 100%;
+    }
+
+    .form-btn:hover { opacity: 0.9; }
+    .form-btn:active { transform: scale(0.98); }
+
+    .form-btn.loading { opacity: 0.6; pointer-events: none; }
+
+    .form-note {
+      font-size: 12px;
+      color: #444;
+      text-align: center;
+      margin-top: 4px;
+    }
+
+    .success-msg {
+      display: none;
+      background: rgba(18,143,165,0.1);
+      border: 1px solid rgba(18,143,165,0.3);
+      border-radius: 12px;
+      padding: 20px 24px;
+      text-align: center;
+    }
+
+    .success-msg.visible { display: block; }
+
+    .success-msg p:first-child {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--teal);
+      margin-bottom: 6px;
+    }
+
+    .success-msg p:last-child {
+      font-size: 14px;
+      color: var(--gray-text);
+    }
+
+    /* HOW IT WORKS */
+    .section {
+      padding: 100px 24px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .section-title {
+      font-size: clamp(28px, 4vw, 44px);
+      font-weight: 800;
+      letter-spacing: -1px;
+      text-align: center;
+      margin-bottom: 64px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--gray-1);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 20px;
+      padding: 32px 28px;
+    }
+
+    .card-icon {
+      width: 44px;
+      height: 44px;
+      background: var(--teal-dim);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      font-size: 22px;
+    }
+
+    .card h3 {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .card p {
+      font-size: 14px;
+      color: var(--gray-text);
+      line-height: 1.6;
+    }
+
+    /* CATEGORIES */
+    .categories {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 48px;
+    }
+
+    .cat-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      border: 1px solid;
+    }
+
+    .cat-pill.accident { background: rgba(229,57,53,0.1); border-color: rgba(229,57,53,0.3); color: #E53935; }
+    .cat-pill.landslide { background: rgba(202,122,0,0.1); border-color: rgba(202,122,0,0.3); color: #CA7A00; }
+    .cat-pill.energy { background: rgba(244,194,13,0.1); border-color: rgba(244,194,13,0.3); color: #F4C20D; }
+    .cat-pill.traffic { background: rgba(242,140,40,0.1); border-color: rgba(242,140,40,0.3); color: #F28C28; }
+    .cat-pill.other { background: rgba(107,114,128,0.1); border-color: rgba(107,114,128,0.3); color: #9CA3AF; }
+
+    /* ANON SECTION */
+    .anon-section {
+      background: var(--gray-1);
+      border-top: 1px solid rgba(255,255,255,0.05);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      padding: 80px 24px;
+      text-align: center;
+    }
+
+    .anon-section h2 {
+      font-size: clamp(24px, 3.5vw, 40px);
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin-bottom: 16px;
+    }
+
+    .anon-section p {
+      font-size: 16px;
+      color: var(--gray-text);
+      max-width: 480px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* FOOTER */
+    footer {
+      padding: 48px 24px;
+      text-align: center;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .footer-logo {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--teal);
+      margin-bottom: 16px;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 24px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .footer-links a {
+      font-size: 13px;
+      color: var(--gray-text);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--white); }
+
+    .footer-copy {
+      font-size: 12px;
+      color: #333;
+    }
+
+    /* MOBILE */
+    @media (max-width: 600px) {
+      nav { padding: 16px 20px; }
+      .form-row { flex-direction: column; }
+      .section { padding: 72px 20px; }
+    }
+
+    /* REDUCED MOTION */
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-logo">sibik</div>
+    <div class="nav-badge">Próximamente en El Salvador</div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <svg class="hero-icon" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="36" cy="36" r="6" fill="#128FA5"/>
+      <path d="M36 14C23.85 14 14 23.85 14 36C14 48.15 23.85 58 36 58" stroke="#128FA5" stroke-width="3" stroke-linecap="round" opacity="0.3"/>
+      <path d="M36 14C48.15 14 58 23.85 58 36C58 48.15 48.15 58 36 58" stroke="#128FA5" stroke-width="3" stroke-linecap="round"/>
+      <path d="M36 22C27.16 22 20 29.16 20 38" stroke="#128FA5" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
+      <path d="M36 22C44.84 22 52 29.16 52 38" stroke="#128FA5" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
+    </svg>
+
+    <p class="hero-eyebrow">Ahuachapán · El Salvador</p>
+
+    <h1 class="hero-title">
+      Sabe lo que pasa<br/><span>antes de salir.</span>
+    </h1>
+
+    <p class="hero-sub">
+      Sibik es la app de reportes ciudadanos en tiempo real para El Salvador. Derrumbes, accidentes, tráfico, cortes de energía — reportado por tu comunidad, para tu comunidad.
+    </p>
+
+    <form class="waitlist-form" id="waitlistForm">
+      <input
+        type="email"
+        class="form-input"
+        id="emailInput"
+        placeholder="tu@correo.com"
+        required
+        autocomplete="email"
+      />
+      <select class="form-input" id="deptInput" required>
+        <option value="" disabled selected>Tu departamento</option>
+        <option value="Ahuachapán">Ahuachapán</option>
+        <option value="Santa Ana">Santa Ana</option>
+        <option value="Sonsonate">Sonsonate</option>
+        <option value="Chalatenango">Chalatenango</option>
+        <option value="La Libertad">La Libertad</option>
+        <option value="San Salvador">San Salvador</option>
+        <option value="Cuscatlán">Cuscatlán</option>
+        <option value="La Paz">La Paz</option>
+        <option value="Cabañas">Cabañas</option>
+        <option value="San Vicente">San Vicente</option>
+        <option value="Usulután">Usulután</option>
+        <option value="San Miguel">San Miguel</option>
+        <option value="Morazán">Morazán</option>
+        <option value="La Unión">La Unión</option>
+        <option value="Otro">Otro país / región</option>
+      </select>
+      <input
+        type="text"
+        class="form-input"
+        id="otroInput"
+        placeholder="¿Desde dónde nos escribes?"
+        style="display:none;"
+      />
+      <button type="submit" class="form-btn" id="submitBtn">
+        Quiero acceso anticipado
+      </button>
+      <p class="form-note">Sin spam. Solo te avisamos cuando llegamos a tu área.</p>
+    </form>
+
+    <div class="success-msg" id="successMsg">
+      <p>¡Ya estás en la lista! 🎉</p>
+      <p>Te avisamos cuando Sibik llegue a tu departamento.</p>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <div class="section">
+    <p class="section-label">Cómo funciona</p>
+    <h2 class="section-title">Reporta. Consulta. Decide.</h2>
+    <div class="cards">
+      <div class="card">
+        <div class="card-icon">📸</div>
+        <h3>Reporta lo que ves</h3>
+        <p>Sube una foto o video de lo que está pasando en tu calle. En segundos llega a todos los que están cerca.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">📍</div>
+        <h3>Ve lo que pasa cerca</h3>
+        <p>Antes de salir, revisa el mapa y el feed. Accidentes, derrumbes, tráfico — todo en tiempo real.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">✅</div>
+        <h3>La comunidad confirma</h3>
+        <p>Otros usuarios confirman si la situación sigue activa o ya se resolvió. Información confiable y actualizada.</p>
+      </div>
+    </div>
+
+    <div class="categories">
+      <div class="cat-pill accident">🚗 Accidente</div>
+      <div class="cat-pill landslide">⛰️ Derrumbe</div>
+      <div class="cat-pill energy">⚡ Corte de energía</div>
+      <div class="cat-pill traffic">🚦 Tráfico</div>
+      <div class="cat-pill other">📌 Otro</div>
+    </div>
+  </div>
+
+  <!-- ANON -->
+  <div class="anon-section">
+    <h2>Anónimo por defecto.</h2>
+    <p>No necesitas crear una cuenta para reportar o consultar. Tu identidad siempre está protegida. Reporta con confianza.</p>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">sibik</div>
+    <div class="footer-links">
+      <a href="/privacy">Privacidad</a>
+      <a href="/terms">Términos</a>
+      <a href="mailto:besibik@protonmail.com">Contacto</a>
+    </div>
+    <p class="footer-copy">© 2026 Sibik · El Salvador</p>
+  </footer>
+
+  <script>
+    const form = document.getElementById('waitlistForm');
+    const btn = document.getElementById('submitBtn');
+    const successMsg = document.getElementById('successMsg');
+
+    const deptSelect = document.getElementById('deptInput');
+    const otroInput = document.getElementById('otroInput');
+
+    deptSelect.addEventListener('change', () => {
+      otroInput.style.display = deptSelect.value === 'Otro' ? 'block' : 'none';
+      otroInput.required = deptSelect.value === 'Otro';
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const email = document.getElementById('emailInput').value.trim();
+      const dept = deptSelect.value === 'Otro'
+        ? (otroInput.value.trim() || 'Otro')
+        : deptSelect.value;
+
+      if (!email || !dept) return;
+
+      btn.textContent = 'Enviando...';
+      btn.classList.add('loading');
+
+      // Replace this URL with your actual form endpoint (Formspree, Supabase, etc.)
+      // For now we simulate a successful submission
+      await new Promise(r => setTimeout(r, 1200));
+
+      form.style.display = 'none';
+      successMsg.classList.add('visible');
+    });
+  </script>
+
+</body>
+</html>

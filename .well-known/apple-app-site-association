@@ -1,0 +1,16 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["948ALZS7KP.app.sibik"],
+        "components": [
+          { "/": "/report/*", "comment": "Individual report deep links" },
+          { "/": "/profile/*", "comment": "Profile deep links" }
+        ]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": ["948ALZS7KP.app.sibik"]
+  }
+}
